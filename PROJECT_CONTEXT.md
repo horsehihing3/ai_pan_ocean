@@ -17,7 +17,7 @@
 ### 🟡 2단계 — 핵심 업무 모듈
 - [x] **사업장 출입신청** — CRUD, 관리자 검토(검토중/개선요청/완료) (S3 업로드·개선요청 이메일 미구현)
 - [x] **협력업체 안전보건평가** — 계약부서 평가 수행, 관리자 검토, 평가항목 관리(CRUD), 협력업체 결과 조회
-- [ ] **반기평가** — 협력업체 제출, 관리자 집계, 근로자 의견조회
+- [x] **반기평가** — 협력업체 설문 작성·임시저장·제출, 관리자 기간별 집계·항목별 평균·근로자 의견 조회
 - [ ] **카카오 비즈메시지 연동** — 정보수집 서류 요청·웹훅 수신·출입기록 자동 매칭
 
 ### 🔵 3단계 — 관리·집계 기능
@@ -44,6 +44,7 @@
 - [x] **협력업체 관리** (2026-04-17) — AdminCompanies(목록·요주의 토글·상세)
 - [x] **공지사항 관리** (2026-04-17) — AdminNotices(CRUD·고정 기능)
 - [x] **협력업체 홈** (2026-04-17) — PartnerHome(공지사항·빠른 이동·개선요청 알림)
+- [x] **반기평가** (2026-04-17) — PartnerSemiAnnual(설문 작성·임시저장·제출) + AdminSemiAnnual(기간별 집계·항목별 평균·근로자 의견)
 
 ---
 
@@ -105,13 +106,14 @@
 | 협력업체 | `/partner/home` | ✅ 완료 |
 | 협력업체 | `/partner/visit-requests` | ✅ 완료 |
 | 협력업체 | `/partner/evaluations` | ✅ 완료 |
-| 협력업체 | `/partner/semi-annual` | 🔵 미구현 (플레이스홀더) |
+| 협력업체 | `/partner/semi-annual` | ✅ 완료 |
 | 관리자 | `/admin/dashboard` | ✅ 완료 |
 | 관리자 | `/admin/companies` | ✅ 완료 |
 | 관리자 | `/admin/registrations` | ✅ 완료 |
 | 관리자 | `/admin/visit-requests` | ✅ 완료 |
 | 관리자 | `/admin/evaluations` | ✅ 완료 |
 | 관리자 | `/admin/notices` | ✅ 완료 |
+| 관리자 | `/admin/semi-annual` | ✅ 완료 |
 | 관리자 | `/admin/accidents` | 🔵 미구현 |
 | 관리자 | `/admin/performance` | 🔵 미구현 |
 | 관리자 | `/admin/health` | 🔵 미구현 |

@@ -16,6 +16,7 @@ const navItems = {
     { to: '/admin/companies', label: '협력업체 관리' },
     { to: '/admin/visit-requests', label: '출입신청 관리' },
     { to: '/admin/evaluations', label: '평가 관리' },
+    { to: '/admin/semi-annual', label: '반기평가 관리' },
     { to: '/admin/notices', label: '공지사항' },
   ],
   CONTRACT_DEPT: [

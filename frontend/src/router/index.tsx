@@ -19,6 +19,7 @@ import AdminVisitRequests from '../pages/admin/AdminVisitRequests';
 import AdminEvaluations from '../pages/admin/AdminEvaluations';
 import AdminRegistrations from '../pages/admin/AdminRegistrations';
 import AdminNotices from '../pages/admin/AdminNotices';
+import AdminSemiAnnual from '../pages/admin/AdminSemiAnnual';
 
 // Contract Pages
 import ContractEvaluations from '../pages/contract/ContractEvaluations';
@@ -70,6 +71,7 @@ const router = createBrowserRouter([
       { path: 'admin/evaluations', element: <RequireAuth roles={['ADMIN']}><AdminEvaluations /></RequireAuth> },
       { path: 'admin/registrations', element: <RequireAuth roles={['ADMIN']}><AdminRegistrations /></RequireAuth> },
       { path: 'admin/notices', element: <RequireAuth roles={['ADMIN']}><AdminNotices /></RequireAuth> },
+      { path: 'admin/semi-annual', element: <RequireAuth roles={['ADMIN']}><AdminSemiAnnual /></RequireAuth> },
       // Contract
       { path: 'contract/evaluations', element: <RequireAuth roles={['CONTRACT_DEPT']}><ContractEvaluations /></RequireAuth> },
     ],
