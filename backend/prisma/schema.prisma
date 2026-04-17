@@ -1,0 +1,292 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+enum Role {
+  PARTNER
+  ADMIN
+  CONTRACT_DEPT
+}
+
+enum ApprovalStatus {
+  PENDING
+  APPROVED
+  REJECTED
+}
+
+enum ReviewStatus {
+  REVIEWING
+  IMPROVEMENT_REQUESTED
+  COMPLETED
+}
+
+model User {
+  id           String    @id @default(cuid())
+  email        String    @unique
+  password     String
+  name         String
+  phone        String?
+  role         Role      @default(PARTNER)
+  isApproved   Boolean   @default(false)
+  approvedAt   DateTime?
+  refreshToken String?
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+
+  company   Company? @relation(fields: [companyId], references: [id])
+  companyId String?
+
+  visitRequests    VisitRequest[]
+  evaluationsGiven Evaluation[]          @relation("EvaluatorRelation")
+  approvals        RegistrationRequest[] @relation("ApproverRelation")
+
+  @@map("users")
+}
+
+model Company {
+  id           String  @id @default(cuid())
+  name         String
+  bizNo        String  @unique
+  industry     String?
+  contractDept String?
+  isWatchlist  Boolean @default(false)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  users               User[]
+  visitRequests       VisitRequest[]
+  evaluations         Evaluation[]
+  semiAnnualEvals     SemiAnnualEvaluation[]
+  accidents           Accident[]
+  registrationRequest RegistrationRequest?
+
+  @@map("companies")
+}
+
+model RegistrationRequest {
+  id             String         @id @default(cuid())
+  companyName    String
+  bizNo          String
+  industry       String?
+  contractDept   String?
+  applicantName  String
+  applicantEmail String
+  applicantPhone String?
+  status         ApprovalStatus @default(PENDING)
+  rejectReason   String?
+  reminderSentAt DateTime?
+  approvedAt     DateTime?
+
+  approvedBy   User?    @relation("ApproverRelation", fields: [approvedById], references: [id])
+  approvedById String?
+  company      Company? @relation(fields: [companyId], references: [id])
+  companyId    String?  @unique
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("registration_requests")
+}
+
+model VisitRequest {
+  id              String       @id @default(cuid())
+  title           String
+  vesselName      String?
+  location        String?
+  workStartDate   DateTime
+  workEndDate     DateTime
+  workerCount     Int
+  workerList      Json?
+  status          ReviewStatus @default(REVIEWING)
+  improvementNote String?
+  completedAt     DateTime?
+  createdAt       DateTime     @default(now())
+  updatedAt       DateTime     @updatedAt
+
+  company       Company @relation(fields: [companyId], references: [id])
+  companyId     String
+  submittedBy   User    @relation(fields: [submittedById], references: [id])
+  submittedById String
+
+  documents VisitDocument[]
+
+  @@map("visit_requests")
+}
+
+model VisitDocument {
+  id         String   @id @default(cuid())
+  type       String
+  fileName   String
+  s3Key      String
+  uploadedAt DateTime @default(now())
+
+  visitRequest   VisitRequest @relation(fields: [visitRequestId], references: [id])
+  visitRequestId String
+
+  @@map("visit_documents")
+}
+
+model EvaluationItem {
+  id          String  @id @default(cuid())
+  category    String
+  name        String
+  description String?
+  maxScore    Int     @default(100)
+  isActive    Boolean @default(true)
+  order       Int     @default(0)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  evaluationScores EvaluationScore[]
+
+  @@map("evaluation_items")
+}
+
+model Evaluation {
+  id              String       @id @default(cuid())
+  year            Int
+  half            Int
+  status          ReviewStatus @default(REVIEWING)
+  overallResult   String?
+  improvementNote String?
+  completedAt     DateTime?
+  createdAt       DateTime     @default(now())
+  updatedAt       DateTime     @updatedAt
+
+  company     Company @relation(fields: [companyId], references: [id])
+  companyId   String
+  evaluator   User    @relation("EvaluatorRelation", fields: [evaluatorId], references: [id])
+  evaluatorId String
+
+  scores    EvaluationScore[]
+  documents EvaluationDocument[]
+
+  @@map("evaluations")
+}
+
+model EvaluationScore {
+  id    String  @id @default(cuid())
+  score Int
+  note  String?
+
+  evaluation   Evaluation     @relation(fields: [evaluationId], references: [id])
+  evaluationId String
+  item         EvaluationItem @relation(fields: [itemId], references: [id])
+  itemId       String
+
+  @@unique([evaluationId, itemId])
+  @@map("evaluation_scores")
+}
+
+model EvaluationDocument {
+  id         String   @id @default(cuid())
+  fileName   String
+  s3Key      String
+  uploadedAt DateTime @default(now())
+
+  evaluation   Evaluation @relation(fields: [evaluationId], references: [id])
+  evaluationId String
+
+  @@map("evaluation_documents")
+}
+
+model SemiAnnualEvaluation {
+  id            String    @id @default(cuid())
+  year          Int
+  half          Int
+  content       Json?
+  workerOpinion String?
+  submittedAt   DateTime?
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  company   Company @relation(fields: [companyId], references: [id])
+  companyId String
+
+  @@map("semi_annual_evaluations")
+}
+
+model Accident {
+  id              String   @id @default(cuid())
+  occurredAt      DateTime
+  description     String
+  workerName      String?
+  injuryType      String?
+  s3SurveyKey     String?
+  s3PreventionKey String?
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  company   Company @relation(fields: [companyId], references: [id])
+  companyId String
+
+  @@map("accidents")
+}
+
+model SafetyPerformance {
+  id         String  @id @default(cuid())
+  year       Int
+  month      Int
+  department String
+  category   String
+  value      Float
+  note       String?
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  @@map("safety_performances")
+}
+
+model HealthRecord {
+  id          String   @id @default(cuid())
+  workerName  String
+  bizNo       String
+  checkupYear Int
+  data        Json?
+  s3Key       String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  consultations HealthConsultation[]
+
+  @@map("health_records")
+}
+
+model HealthConsultation {
+  id      String   @id @default(cuid())
+  date    DateTime
+  content String
+  createdAt DateTime @default(now())
+
+  healthRecord   HealthRecord @relation(fields: [healthRecordId], references: [id])
+  healthRecordId String
+
+  @@map("health_consultations")
+}
+
+model Notice {
+  id        String   @id @default(cuid())
+  title     String
+  content   String
+  isPinned  Boolean  @default(false)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("notices")
+}
+
+model SafetyRule {
+  id       String   @id @default(cuid())
+  industry String
+  title    String
+  content  String
+  order    Int      @default(0)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("safety_rules")
+}
