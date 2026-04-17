@@ -14,6 +14,7 @@ const evaluationRoutes = require('./routes/evaluations');
 const companyRoutes = require('./routes/companies');
 const noticeRoutes = require('./routes/notices');
 const semiAnnualRoutes = require('./routes/semiAnnual');
+const accidentRoutes = require('./routes/accidents');
 
 const app = express();
 const PORT = process.env.PORT || 4000;
@@ -33,6 +34,7 @@ app.use('/api/evaluations', evaluationRoutes);
 app.use('/api/companies', companyRoutes);
 app.use('/api/notices', noticeRoutes);
 app.use('/api/semi-annual', semiAnnualRoutes);
+app.use('/api/accidents', accidentRoutes);
 
 app.use(errorHandler);
 

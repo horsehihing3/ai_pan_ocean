@@ -9,6 +9,7 @@ const navItems = {
     { to: '/partner/visit-requests', label: '사업장 출입신청' },
     { to: '/partner/evaluations', label: '안전보건평가' },
     { to: '/partner/semi-annual', label: '반기평가' },
+    { to: '/partner/accidents', label: '산업재해 신고' },
   ],
   ADMIN: [
     { to: '/admin/dashboard', label: '대시보드' },
@@ -17,6 +18,7 @@ const navItems = {
     { to: '/admin/visit-requests', label: '출입신청 관리' },
     { to: '/admin/evaluations', label: '평가 관리' },
     { to: '/admin/semi-annual', label: '반기평가 관리' },
+    { to: '/admin/accidents', label: '산업재해 LIST' },
     { to: '/admin/notices', label: '공지사항' },
   ],
   CONTRACT_DEPT: [

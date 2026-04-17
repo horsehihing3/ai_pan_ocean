@@ -20,6 +20,10 @@ import AdminEvaluations from '../pages/admin/AdminEvaluations';
 import AdminRegistrations from '../pages/admin/AdminRegistrations';
 import AdminNotices from '../pages/admin/AdminNotices';
 import AdminSemiAnnual from '../pages/admin/AdminSemiAnnual';
+import AdminAccidents from '../pages/admin/AdminAccidents';
+
+// Partner Pages (additional)
+import PartnerAccidents from '../pages/partner/PartnerAccidents';
 
 // Contract Pages
 import ContractEvaluations from '../pages/contract/ContractEvaluations';
@@ -64,6 +68,7 @@ const router = createBrowserRouter([
       { path: 'partner/visit-requests', element: <RequireAuth roles={['PARTNER']}><PartnerVisitRequests /></RequireAuth> },
       { path: 'partner/evaluations', element: <RequireAuth roles={['PARTNER']}><PartnerEvaluations /></RequireAuth> },
       { path: 'partner/semi-annual', element: <RequireAuth roles={['PARTNER']}><PartnerSemiAnnual /></RequireAuth> },
+      { path: 'partner/accidents', element: <RequireAuth roles={['PARTNER']}><PartnerAccidents /></RequireAuth> },
       // Admin
       { path: 'admin/dashboard', element: <RequireAuth roles={['ADMIN']}><AdminDashboard /></RequireAuth> },
       { path: 'admin/companies', element: <RequireAuth roles={['ADMIN']}><AdminCompanies /></RequireAuth> },
@@ -72,6 +77,7 @@ const router = createBrowserRouter([
       { path: 'admin/registrations', element: <RequireAuth roles={['ADMIN']}><AdminRegistrations /></RequireAuth> },
       { path: 'admin/notices', element: <RequireAuth roles={['ADMIN']}><AdminNotices /></RequireAuth> },
       { path: 'admin/semi-annual', element: <RequireAuth roles={['ADMIN']}><AdminSemiAnnual /></RequireAuth> },
+      { path: 'admin/accidents', element: <RequireAuth roles={['ADMIN']}><AdminAccidents /></RequireAuth> },
       // Contract
       { path: 'contract/evaluations', element: <RequireAuth roles={['CONTRACT_DEPT']}><ContractEvaluations /></RequireAuth> },
     ],

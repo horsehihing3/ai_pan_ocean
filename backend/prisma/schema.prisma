@@ -213,9 +213,11 @@ model SemiAnnualEvaluation {
 model Accident {
   id              String   @id @default(cuid())
   occurredAt      DateTime
+  location        String?
   description     String
   workerName      String?
   injuryType      String?
+  lostDays        Int?
   s3SurveyKey     String?
   s3PreventionKey String?
   createdAt       DateTime @default(now())

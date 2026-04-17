@@ -22,7 +22,7 @@
 
 ### 🔵 3단계 — 관리·집계 기능
 - [ ] **안전보건실적** — 부서별 입력, 종합 조회, 엑셀 다운로드
-- [ ] **산업재해 LIST** — 재해 신고·서류 자동 매칭·기록 관리
+- [x] **산업재해 LIST** — 협력업체 신고·수정·삭제, 관리자 전체 목록(필터)+연도별 통계(월별·유형별)
 - [ ] **보건파트** — 병원자료 업로드, 3개년 수치 팝업, 상담이력
 - [ ] **관리자 대시보드** — 공지사항, 안전수칙(업종별), 요주의 업체 플래그
 
@@ -45,6 +45,7 @@
 - [x] **공지사항 관리** (2026-04-17) — AdminNotices(CRUD·고정 기능)
 - [x] **협력업체 홈** (2026-04-17) — PartnerHome(공지사항·빠른 이동·개선요청 알림)
 - [x] **반기평가** (2026-04-17) — PartnerSemiAnnual(설문 작성·임시저장·제출) + AdminSemiAnnual(기간별 집계·항목별 평균·근로자 의견)
+- [x] **산업재해 LIST** (2026-04-17) — schema 마이그레이션(location·lostDays 추가), PartnerAccidents(신고·수정·삭제) + AdminAccidents(필터 목록·월별/유형별 통계)
 
 ---
 
@@ -114,7 +115,8 @@
 | 관리자 | `/admin/evaluations` | ✅ 완료 |
 | 관리자 | `/admin/notices` | ✅ 완료 |
 | 관리자 | `/admin/semi-annual` | ✅ 완료 |
-| 관리자 | `/admin/accidents` | 🔵 미구현 |
+| 협력업체 | `/partner/accidents` | ✅ 완료 |
+| 관리자 | `/admin/accidents` | ✅ 완료 |
 | 관리자 | `/admin/performance` | 🔵 미구현 |
 | 관리자 | `/admin/health` | 🔵 미구현 |
 | 관리자 | `/admin/safety-rules` | 🔵 미구현 |
