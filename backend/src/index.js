@@ -15,6 +15,8 @@ const companyRoutes = require('./routes/companies');
 const noticeRoutes = require('./routes/notices');
 const semiAnnualRoutes = require('./routes/semiAnnual');
 const accidentRoutes = require('./routes/accidents');
+const performanceRoutes = require('./routes/performance');
+const safetyRuleRoutes = require('./routes/safetyRules');
 
 const app = express();
 const PORT = process.env.PORT || 4000;
@@ -35,6 +37,8 @@ app.use('/api/companies', companyRoutes);
 app.use('/api/notices', noticeRoutes);
 app.use('/api/semi-annual', semiAnnualRoutes);
 app.use('/api/accidents', accidentRoutes);
+app.use('/api/performance', performanceRoutes);
+app.use('/api/safety-rules', safetyRuleRoutes);
 
 app.use(errorHandler);
 

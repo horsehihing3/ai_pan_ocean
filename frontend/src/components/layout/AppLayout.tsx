@@ -19,10 +19,13 @@ const navItems = {
     { to: '/admin/evaluations', label: '평가 관리' },
     { to: '/admin/semi-annual', label: '반기평가 관리' },
     { to: '/admin/accidents', label: '산업재해 LIST' },
+    { to: '/admin/performance', label: '안전보건실적' },
+    { to: '/admin/safety-rules', label: '안전수칙 관리' },
     { to: '/admin/notices', label: '공지사항' },
   ],
   CONTRACT_DEPT: [
     { to: '/contract/evaluations', label: '안전보건평가' },
+    { to: '/contract/performance', label: '안전보건실적' },
   ],
 };
 

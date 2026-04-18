@@ -21,10 +21,10 @@
 - [ ] **카카오 비즈메시지 연동** — 정보수집 서류 요청·웹훅 수신·출입기록 자동 매칭
 
 ### 🔵 3단계 — 관리·집계 기능
-- [ ] **안전보건실적** — 부서별 입력, 종합 조회, 엑셀 다운로드
+- [x] **안전보건실적** — 부서별 입력, 종합 조회, 엑셀 다운로드
 - [x] **산업재해 LIST** — 협력업체 신고·수정·삭제, 관리자 전체 목록(필터)+연도별 통계(월별·유형별)
 - [ ] **보건파트** — 병원자료 업로드, 3개년 수치 팝업, 상담이력
-- [ ] **관리자 대시보드** — 공지사항, 안전수칙(업종별), 요주의 업체 플래그
+- [x] **관리자 대시보드** — 공지사항, 안전수칙(업종별), 요주의 업체 플래그
 
 ---
 
@@ -32,6 +32,13 @@
 
 > 항목이 10개 이상 쌓이면 `docs/ARCHIVE.md`로 이동 후 여기서 삭제
 > 세션 1(2026-04-17) 14개 항목 → `docs/ARCHIVE.md` 이동 완료
+
+### 세션 2 (2026-04-18)
+- [x] **안전보건실적** — 계약부서 월별 입력/수정/삭제, 관리자 전체목록+월별집계+CSV 엑셀 다운로드
+- [x] **안전수칙 관리** — 업종별 CRUD, 업종 필터, 내용 펼치기/접기
+- [x] **세션 자동 복원** — App.tsx 시작 시 Refresh Token 쿠키로 세션 복원 (페이지 새로고침 후 로그인 유지)
+- [x] **라우터 가드 개선** — 권한 없는 경로 접근 시 `/unauthorized` 대신 역할별 홈으로 리다이렉트
+- [x] **대시보드 빠른이동** — 안전수칙 관리·안전보건실적 링크 추가
 
 ---
 
@@ -45,6 +52,7 @@
 | Prisma 7 datasource url 오류 | schema.prisma에서 `url` 속성 제거됨 | `prisma.config.ts`에서 설정, schema.prisma datasource에서 url 삭제 |
 | Prisma generate TypeScript only | `prisma-client` provider는 TS 전용 | generator를 `prisma-client-js`로 변경 |
 | 스키마 변경 후 `Unknown argument` 오류 | `prisma migrate dev` 후 서버 재시작해도 구 클라이언트 유지 | `npx prisma generate` 실행 후 **서버 완전 재시작** 필수 (nodemon만으론 부족) |
+| 페이지 새로고침 시 로그인 풀림 | Zustand 인메모리 스토어 — 새로고침 시 `user: null` | `App.tsx`에서 마운트 시 `/api/auth/refresh` 호출해 세션 복원 (`initialized` 플래그로 RouterProvider 지연 렌더) |
 
 ---
 
@@ -104,11 +112,11 @@
 | 관리자 | `/admin/semi-annual` | ✅ 완료 |
 | 협력업체 | `/partner/accidents` | ✅ 완료 |
 | 관리자 | `/admin/accidents` | ✅ 완료 |
-| 관리자 | `/admin/performance` | 🔵 미구현 |
+| 관리자 | `/admin/performance` | ✅ 완료 |
 | 관리자 | `/admin/health` | 🔵 미구현 |
-| 관리자 | `/admin/safety-rules` | 🔵 미구현 |
+| 관리자 | `/admin/safety-rules` | ✅ 완료 |
 | 계약부서 | `/contract/evaluations` | ✅ 완료 |
-| 계약부서 | `/contract/performance` | 🔵 미구현 |
+| 계약부서 | `/contract/performance` | ✅ 완료 |
 
 ---
 

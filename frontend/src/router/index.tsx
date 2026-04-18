@@ -27,15 +27,25 @@ import PartnerAccidents from '../pages/partner/PartnerAccidents';
 
 // Contract Pages
 import ContractEvaluations from '../pages/contract/ContractEvaluations';
+import ContractPerformance from '../pages/contract/ContractPerformance';
+
+// Admin Performance & Safety Rules
+import AdminPerformance from '../pages/admin/AdminPerformance';
+import AdminSafetyRules from '../pages/admin/AdminSafetyRules';
 
 // Layout
 import AppLayout from '../components/layout/AppLayout';
 
 // [2026-04-17] 역할 기반 라우터 가드 컴포넌트
+// [2026-04-18] 권한 없는 경로 접근 시 각 역할의 홈으로 리다이렉트
 function RequireAuth({ children, roles }: { children: React.ReactElement; roles?: string[] }) {
   const { user } = useAuthStore();
   if (!user) return <Navigate to="/login" replace />;
-  if (roles && !roles.includes(user.role)) return <Navigate to="/unauthorized" replace />;
+  if (roles && !roles.includes(user.role)) {
+    if (user.role === 'ADMIN') return <Navigate to="/admin/dashboard" replace />;
+    if (user.role === 'CONTRACT_DEPT') return <Navigate to="/contract/evaluations" replace />;
+    return <Navigate to="/partner/home" replace />;
+  }
   return children;
 }
 
@@ -78,11 +88,13 @@ const router = createBrowserRouter([
       { path: 'admin/notices', element: <RequireAuth roles={['ADMIN']}><AdminNotices /></RequireAuth> },
       { path: 'admin/semi-annual', element: <RequireAuth roles={['ADMIN']}><AdminSemiAnnual /></RequireAuth> },
       { path: 'admin/accidents', element: <RequireAuth roles={['ADMIN']}><AdminAccidents /></RequireAuth> },
+      { path: 'admin/performance', element: <RequireAuth roles={['ADMIN']}><AdminPerformance /></RequireAuth> },
+      { path: 'admin/safety-rules', element: <RequireAuth roles={['ADMIN']}><AdminSafetyRules /></RequireAuth> },
       // Contract
       { path: 'contract/evaluations', element: <RequireAuth roles={['CONTRACT_DEPT']}><ContractEvaluations /></RequireAuth> },
+      { path: 'contract/performance', element: <RequireAuth roles={['CONTRACT_DEPT']}><ContractPerformance /></RequireAuth> },
     ],
   },
-  { path: '/unauthorized', element: <div className="p-8 text-center text-red-500">접근 권한이 없습니다.</div> },
   { path: '*', element: <Navigate to="/" replace /> },
 ]);
 

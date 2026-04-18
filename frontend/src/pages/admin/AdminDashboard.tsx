@@ -134,6 +134,8 @@ export default function AdminDashboard() {
               { label: '출입신청 관리', path: '/admin/visit-requests', color: 'bg-blue-50 text-blue-700 border-blue-200' },
               { label: '평가 관리', path: '/admin/evaluations', color: 'bg-green-50 text-green-700 border-green-200' },
               { label: '협력업체 관리', path: '/admin/companies', color: 'bg-gray-50 text-gray-700 border-gray-200' },
+              { label: '안전수칙 관리', path: '/admin/safety-rules', color: 'bg-yellow-50 text-yellow-700 border-yellow-200' },
+              { label: '안전보건실적', path: '/admin/performance', color: 'bg-teal-50 text-teal-700 border-teal-200' },
             ].map((item) => (
               <button
                 key={item.path}
