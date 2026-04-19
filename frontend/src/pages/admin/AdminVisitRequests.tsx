@@ -1,9 +1,10 @@
 import { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { getVisitRequestsApi, reviewVisitRequestApi } from '../../api/visitRequests';
+import { getVisitRequestsApi, reviewVisitRequestApi, getDocumentUrlApi } from '../../api/visitRequests';
 
 // [2026-04-17] 관리자 출입신청 검토 페이지
 
+type VisitDocument = { id: string; type: string; fileName: string; uploadedAt: string };
 type VisitRequest = {
   id: string;
   title: string;
@@ -19,6 +20,7 @@ type VisitRequest = {
   createdAt: string;
   company: { name: string };
   submittedBy: { name: string };
+  documents: VisitDocument[];
 };
 
 const STATUS_MAP = {
@@ -74,6 +76,18 @@ export default function AdminVisitRequests() {
 
   const fmt = (d: string) =>
     new Date(d).toLocaleDateString('ko-KR', { year: 'numeric', month: '2-digit', day: '2-digit' });
+
+  const handleDownload = async (requestId: string, docId: string, fileName: string) => {
+    try {
+      const res = await getDocumentUrlApi(requestId, docId);
+      const a = document.createElement('a');
+      a.href = res.data.data.url;
+      a.download = fileName;
+      a.click();
+    } catch {
+      alert('다운로드에 실패했습니다.');
+    }
+  };
 
   const counts = {
     all: all.length,
@@ -259,6 +273,31 @@ export default function AdminVisitRequests() {
                 </div>
               )}
             </dl>
+
+            {/* 첨부 서류 */}
+            <div className="mt-4 border-t border-gray-100 pt-4">
+              <p className="text-sm font-semibold text-gray-700 mb-2">첨부 서류</p>
+              {!detailTarget.documents || detailTarget.documents.length === 0 ? (
+                <p className="text-xs text-gray-400">첨부된 서류가 없습니다.</p>
+              ) : (
+                <div className="space-y-2">
+                  {detailTarget.documents.map((doc) => (
+                    <div key={doc.id} className="flex items-center justify-between bg-gray-50 rounded px-3 py-2">
+                      <div>
+                        <span className="text-xs font-semibold text-blue-700 mr-2">[{doc.type}]</span>
+                        <span className="text-xs text-gray-700">{doc.fileName}</span>
+                      </div>
+                      <button
+                        onClick={() => handleDownload(detailTarget.id, doc.id, doc.fileName)}
+                        className="text-xs text-blue-600 hover:underline shrink-0"
+                      >
+                        다운로드
+                      </button>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
 
             <div className="flex gap-2 mt-6">
               {detailTarget.status !== 'COMPLETED' && (

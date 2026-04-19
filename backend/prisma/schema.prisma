@@ -250,6 +250,7 @@ model HealthRecord {
   checkupYear Int
   data        Json?
   s3Key       String?
+  s3FileName  String?
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 

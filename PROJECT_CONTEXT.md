@@ -15,7 +15,7 @@
 - [x] **가입·승인 플로우** — 협력업체 가입신청 → 이메일 알림(안전경영팀) → 승인/반려 이메일, 2일 미승인 리마인드
 
 ### 🟡 2단계 — 핵심 업무 모듈
-- [x] **사업장 출입신청** — CRUD, 관리자 검토(검토중/개선요청/완료) (S3 업로드·개선요청 이메일 미구현)
+- [x] **사업장 출입신청** — CRUD, 관리자 검토, S3 서류 업로드·다운로드·삭제, 개선요청 이메일 발송
 - [x] **협력업체 안전보건평가** — 계약부서 평가 수행, 관리자 검토, 평가항목 관리(CRUD), 협력업체 결과 조회
 - [x] **반기평가** — 협력업체 설문 작성·임시저장·제출, 관리자 기간별 집계·항목별 평균·근로자 의견 조회
 - [ ] **카카오 비즈메시지 연동** — 정보수집 서류 요청·웹훅 수신·출입기록 자동 매칭
@@ -23,7 +23,7 @@
 ### 🔵 3단계 — 관리·집계 기능
 - [x] **안전보건실적** — 부서별 입력, 종합 조회, 엑셀 다운로드
 - [x] **산업재해 LIST** — 협력업체 신고·수정·삭제, 관리자 전체 목록(필터)+연도별 통계(월별·유형별)
-- [ ] **보건파트** — 병원자료 업로드, 3개년 수치 팝업, 상담이력
+- [x] **보건파트** — 건강기록 CRUD, 3개년 수치 팝업, 상담이력, 병원자료 S3 업로드·다운로드·삭제
 - [x] **관리자 대시보드** — 공지사항, 안전수칙(업종별), 요주의 업체 플래그
 
 ---
@@ -31,14 +31,7 @@
 ## ✅ 완료된 작업
 
 > 항목이 10개 이상 쌓이면 `docs/ARCHIVE.md`로 이동 후 여기서 삭제
-> 세션 1(2026-04-17) 14개 항목 → `docs/ARCHIVE.md` 이동 완료
-
-### 세션 2 (2026-04-18)
-- [x] **안전보건실적** — 계약부서 월별 입력/수정/삭제, 관리자 전체목록+월별집계+CSV 엑셀 다운로드
-- [x] **안전수칙 관리** — 업종별 CRUD, 업종 필터, 내용 펼치기/접기
-- [x] **세션 자동 복원** — App.tsx 시작 시 Refresh Token 쿠키로 세션 복원 (페이지 새로고침 후 로그인 유지)
-- [x] **라우터 가드 개선** — 권한 없는 경로 접근 시 `/unauthorized` 대신 역할별 홈으로 리다이렉트
-- [x] **대시보드 빠른이동** — 안전수칙 관리·안전보건실적 링크 추가
+> 세션 1(2026-04-17) 14개, 세션 2(2026-04-18) 5개, 세션 3(2026-04-19) 4개 → `docs/ARCHIVE.md` 이동 완료
 
 ---
 
@@ -53,6 +46,8 @@
 | Prisma generate TypeScript only | `prisma-client` provider는 TS 전용 | generator를 `prisma-client-js`로 변경 |
 | 스키마 변경 후 `Unknown argument` 오류 | `prisma migrate dev` 후 서버 재시작해도 구 클라이언트 유지 | `npx prisma generate` 실행 후 **서버 완전 재시작** 필수 (nodemon만으론 부족) |
 | 페이지 새로고침 시 로그인 풀림 | Zustand 인메모리 스토어 — 새로고침 시 `user: null` | `App.tsx`에서 마운트 시 `/api/auth/refresh` 호출해 세션 복원 (`initialized` 플래그로 RouterProvider 지연 렌더) |
+| 한글 파일명 깨짐 (multer) | multer가 multipart 파일명을 latin1로 디코딩 | `Buffer.from(req.file.originalname, 'latin1').toString('utf8')` |
+| S3 다운로드 시 파일명 UUID로 저장 | 브라우저 CORS로 `a.download` 무시됨 | `GetObjectCommand`에 `ResponseContentDisposition` 헤더 설정 |
 
 ---
 
@@ -113,7 +108,7 @@
 | 협력업체 | `/partner/accidents` | ✅ 완료 |
 | 관리자 | `/admin/accidents` | ✅ 완료 |
 | 관리자 | `/admin/performance` | ✅ 완료 |
-| 관리자 | `/admin/health` | 🔵 미구현 |
+| 관리자 | `/admin/health` | ✅ 완료 |
 | 관리자 | `/admin/safety-rules` | ✅ 완료 |
 | 계약부서 | `/contract/evaluations` | ✅ 완료 |
 | 계약부서 | `/contract/performance` | ✅ 완료 |

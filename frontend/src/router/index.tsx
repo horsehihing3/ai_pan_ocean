@@ -29,9 +29,10 @@ import PartnerAccidents from '../pages/partner/PartnerAccidents';
 import ContractEvaluations from '../pages/contract/ContractEvaluations';
 import ContractPerformance from '../pages/contract/ContractPerformance';
 
-// Admin Performance & Safety Rules
+// Admin Performance & Safety Rules & Health
 import AdminPerformance from '../pages/admin/AdminPerformance';
 import AdminSafetyRules from '../pages/admin/AdminSafetyRules';
+import AdminHealth from '../pages/admin/AdminHealth';
 
 // Layout
 import AppLayout from '../components/layout/AppLayout';
@@ -90,6 +91,7 @@ const router = createBrowserRouter([
       { path: 'admin/accidents', element: <RequireAuth roles={['ADMIN']}><AdminAccidents /></RequireAuth> },
       { path: 'admin/performance', element: <RequireAuth roles={['ADMIN']}><AdminPerformance /></RequireAuth> },
       { path: 'admin/safety-rules', element: <RequireAuth roles={['ADMIN']}><AdminSafetyRules /></RequireAuth> },
+      { path: 'admin/health', element: <RequireAuth roles={['ADMIN']}><AdminHealth /></RequireAuth> },
       // Contract
       { path: 'contract/evaluations', element: <RequireAuth roles={['CONTRACT_DEPT']}><ContractEvaluations /></RequireAuth> },
       { path: 'contract/performance', element: <RequireAuth roles={['CONTRACT_DEPT']}><ContractPerformance /></RequireAuth> },

@@ -21,6 +21,7 @@ const navItems = {
     { to: '/admin/accidents', label: '산업재해 LIST' },
     { to: '/admin/performance', label: '안전보건실적' },
     { to: '/admin/safety-rules', label: '안전수칙 관리' },
+    { to: '/admin/health', label: '보건파트' },
     { to: '/admin/notices', label: '공지사항' },
   ],
   CONTRACT_DEPT: [
