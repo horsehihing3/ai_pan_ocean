@@ -33,7 +33,9 @@ const createOpinion = async (req, res) => {
   let fileName = null;
   if (req.file) {
     const originalName = Buffer.from(req.file.originalname, 'latin1').toString('utf8');
-    fileKey = await uploadToS3(req.file.buffer, originalName, req.file.mimetype, 'opinions');
+    const s3Key = `opinions/${Date.now()}_${originalName}`;
+    await uploadToS3({ key: s3Key, buffer: req.file.buffer, mimetype: req.file.mimetype });
+    fileKey = s3Key;
     fileName = originalName;
   }
 
