@@ -5,6 +5,7 @@ import useAuthStore from '../store/authStore';
 // Auth Pages
 import LoginPage from '../pages/auth/LoginPage';
 import RegisterPage from '../pages/auth/RegisterPage';
+import PrivacyConsentPage from '../pages/auth/PrivacyConsentPage';
 
 // Partner Pages
 import PartnerHome from '../pages/partner/PartnerHome';
@@ -33,6 +34,11 @@ import ContractPerformance from '../pages/contract/ContractPerformance';
 import AdminPerformance from '../pages/admin/AdminPerformance';
 import AdminSafetyRules from '../pages/admin/AdminSafetyRules';
 import AdminHealth from '../pages/admin/AdminHealth';
+
+// Common Intro Pages
+import SafetyPolicyPage from '../pages/common/SafetyPolicyPage';
+import SafetyCertificationPage from '../pages/common/SafetyCertificationPage';
+import SafetyGoalsPage from '../pages/common/SafetyGoalsPage';
 
 // Layout
 import AppLayout from '../components/layout/AppLayout';
@@ -66,6 +72,10 @@ const router = createBrowserRouter([
     element: <RequireGuest><LoginPage /></RequireGuest>,
   },
   {
+    path: '/privacy-consent',
+    element: <RequireGuest><PrivacyConsentPage /></RequireGuest>,
+  },
+  {
     path: '/register',
     element: <RequireGuest><RegisterPage /></RequireGuest>,
   },
@@ -95,6 +105,10 @@ const router = createBrowserRouter([
       // Contract
       { path: 'contract/evaluations', element: <RequireAuth roles={['CONTRACT_DEPT']}><ContractEvaluations /></RequireAuth> },
       { path: 'contract/performance', element: <RequireAuth roles={['CONTRACT_DEPT']}><ContractPerformance /></RequireAuth> },
+      // Common Intro (모든 역할 접근 가능)
+      { path: 'intro/safety-policy', element: <RequireAuth><SafetyPolicyPage /></RequireAuth> },
+      { path: 'intro/certification', element: <RequireAuth><SafetyCertificationPage /></RequireAuth> },
+      { path: 'intro/safety-goals', element: <RequireAuth><SafetyGoalsPage /></RequireAuth> },
     ],
   },
   { path: '*', element: <Navigate to="/" replace /> },

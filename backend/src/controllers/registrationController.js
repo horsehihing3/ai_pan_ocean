@@ -1,6 +1,7 @@
 const bcrypt = require('bcrypt');
 const prisma = require('../utils/prisma');
 const { AppError } = require('../middleware/errorHandler');
+const { uploadToS3 } = require('../utils/s3');
 const {
   sendRegistrationNotifyToAdmin,
   sendApprovalEmail,
@@ -11,8 +12,15 @@ const BCRYPT_ROUNDS = 12;
 const ADMIN_EMAIL = process.env.EMAIL_USER; // 안전경영팀 이메일
 
 // [2026-04-17] 협력업체 가입신청 (미인증 상태에서 접근)
+// [2026-04-21] 신규 필드 전체 저장 (영문명, 주소, 파일 등)
 const submitRegistration = async (req, res) => {
-  const { companyName, bizNo, industry, contractDept, applicantName, applicantEmail, applicantPhone, password } = req.body;
+  const {
+    companyName, companyNameEn, bizNo, companyPhone,
+    zipCode, address, addressDetail,
+    industry, industryEtc, contractDept,
+    applicantName, applicantTitle, applicantEmail, applicantPhone, applicantContactEmail,
+    password,
+  } = req.body;
 
   if (!companyName || !bizNo || !applicantName || !applicantEmail || !password) {
     throw new AppError('필수 항목을 모두 입력해 주세요.');
@@ -25,12 +33,31 @@ const submitRegistration = async (req, res) => {
   const existingUser = await prisma.user.findUnique({ where: { email: applicantEmail } });
   if (existingUser) throw new AppError('이미 사용 중인 이메일입니다.');
 
+  // 사업자 등록증 S3 업로드
+  let bizFileKey = null;
+  if (req.file) {
+    const ext = req.file.originalname.split('.').pop();
+    bizFileKey = `registrations/biz-files/${Date.now()}-${bizNo.replace(/[^0-9]/g, '')}.${ext}`;
+    await uploadToS3({ key: bizFileKey, buffer: req.file.buffer, mimetype: req.file.mimetype });
+  }
+
   const hashedPassword = await bcrypt.hash(password, BCRYPT_ROUNDS);
 
   // 트랜잭션: 가입신청 + 미승인 User 생성
   const result = await prisma.$transaction(async (tx) => {
     const company = await tx.company.create({
-      data: { name: companyName, bizNo, industry, contractDept },
+      data: {
+        name: companyName,
+        nameEn: companyNameEn || null,
+        bizNo,
+        phone: companyPhone || null,
+        zipCode: zipCode || null,
+        address: address || null,
+        addressDetail: addressDetail || null,
+        industry: industry || null,
+        industryEtc: industryEtc || null,
+        contractDept: contractDept || null,
+      },
     });
 
     const user = await tx.user.create({
@@ -38,7 +65,9 @@ const submitRegistration = async (req, res) => {
         email: applicantEmail,
         password: hashedPassword,
         name: applicantName,
-        phone: applicantPhone,
+        phone: applicantPhone || null,
+        title: applicantTitle || null,
+        contactEmail: applicantContactEmail || null,
         role: 'PARTNER',
         isApproved: false,
         companyId: company.id,
@@ -48,12 +77,21 @@ const submitRegistration = async (req, res) => {
     const request = await tx.registrationRequest.create({
       data: {
         companyName,
+        companyNameEn: companyNameEn || null,
         bizNo,
-        industry,
-        contractDept,
+        companyPhone: companyPhone || null,
+        zipCode: zipCode || null,
+        address: address || null,
+        addressDetail: addressDetail || null,
+        industry: industry || null,
+        industryEtc: industryEtc || null,
+        contractDept: contractDept || null,
         applicantName,
+        applicantTitle: applicantTitle || null,
         applicantEmail,
-        applicantPhone,
+        applicantPhone: applicantPhone || null,
+        applicantContactEmail: applicantContactEmail || null,
+        bizFileKey,
         companyId: company.id,
       },
     });
@@ -89,8 +127,11 @@ const getRegistrations = async (req, res) => {
     where,
     orderBy: { createdAt: 'desc' },
     select: {
-      id: true, companyName: true, bizNo: true, industry: true, contractDept: true,
-      applicantName: true, applicantEmail: true, applicantPhone: true,
+      id: true, companyName: true, companyNameEn: true, bizNo: true,
+      companyPhone: true, zipCode: true, address: true, addressDetail: true,
+      industry: true, industryEtc: true, contractDept: true,
+      applicantName: true, applicantTitle: true, applicantEmail: true,
+      applicantPhone: true, applicantContactEmail: true, bizFileKey: true,
       status: true, rejectReason: true, createdAt: true, approvedAt: true,
     },
   });

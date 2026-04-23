@@ -1,4 +1,5 @@
 // [2026-04-18] 관리자 안전수칙 관리 (업종별 CRUD)
+// [2026-04-21] 디자인 표준화
 import React, { useEffect, useState } from 'react';
 import {
   getSafetyRulesApi, getIndustriesApi,
@@ -93,7 +94,6 @@ export default function AdminSafetyRules() {
     }
   };
 
-  // 업종별 그룹핑
   const grouped = rules.reduce<Record<string, SafetyRule[]>>((acc, rule) => {
     if (!acc[rule.industry]) acc[rule.industry] = [];
     acc[rule.industry].push(rule);
@@ -101,90 +101,105 @@ export default function AdminSafetyRules() {
   }, {});
 
   return (
-    <div className="p-6 max-w-4xl mx-auto">
-      <div className="flex items-center justify-between mb-6">
-        <h1 className="text-2xl font-bold text-gray-800">안전수칙 관리</h1>
+    <div className="p-8">
+      <h1 className="text-2xl font-bold text-gray-800 mb-6">안전수칙 관리</h1>
+
+      {/* 등록 버튼 */}
+      <div className="flex justify-end mb-4">
         <button
           onClick={() => { setShowForm(true); setEditId(null); setForm(emptyForm); setError(''); }}
-          className="bg-blue-600 text-white px-4 py-2 rounded text-sm hover:bg-blue-700"
+          className="px-4 py-2 bg-blue-700 text-white text-sm font-medium rounded-lg hover:bg-blue-800 transition-colors"
         >
           + 새 안전수칙
         </button>
       </div>
 
-      {/* 등록/수정 폼 */}
+      {/* 등록/수정 폼 모달 */}
       {showForm && (
-        <form onSubmit={handleSubmit} className="bg-white border rounded-lg p-5 mb-6 shadow-sm">
-          <h2 className="text-base font-semibold text-gray-700 mb-4">
-            {editId ? '안전수칙 수정' : '안전수칙 등록'}
-          </h2>
-          {error && <p className="text-red-500 text-sm mb-3">{error}</p>}
-          <div className="grid grid-cols-2 gap-3 mb-3">
-            <div>
-              <label className="block text-xs text-gray-500 mb-1">업종 *</label>
-              <input
-                className="border rounded px-3 py-2 text-sm w-full"
-                placeholder="예: 조선업, 건설업, 화학업..."
-                value={form.industry}
-                onChange={(e) => setForm({ ...form, industry: e.target.value })}
-                list="industry-list"
-              />
-              <datalist id="industry-list">
-                {industries.map((ind) => <option key={ind} value={ind} />)}
-              </datalist>
-            </div>
-            <div>
-              <label className="block text-xs text-gray-500 mb-1">제목 *</label>
-              <input
-                className="border rounded px-3 py-2 text-sm w-full"
-                placeholder="안전수칙 제목"
-                value={form.title}
-                onChange={(e) => setForm({ ...form, title: e.target.value })}
-              />
-            </div>
-          </div>
-          <div className="mb-3">
-            <label className="block text-xs text-gray-500 mb-1">내용 *</label>
-            <textarea
-              className="border rounded px-3 py-2 text-sm w-full"
-              rows={4}
-              placeholder="안전수칙 내용을 입력하세요."
-              value={form.content}
-              onChange={(e) => setForm({ ...form, content: e.target.value })}
-            />
-          </div>
-          <div className="flex items-center gap-3">
-            <div className="w-24">
-              <label className="block text-xs text-gray-500 mb-1">순서</label>
-              <input
-                type="number"
-                className="border rounded px-3 py-2 text-sm w-full"
-                value={form.order}
-                onChange={(e) => setForm({ ...form, order: e.target.value })}
-              />
-            </div>
-            <div className="flex gap-2 ml-auto mt-4">
-              <button type="submit" className="bg-blue-600 text-white px-4 py-2 rounded text-sm hover:bg-blue-700">
-                {editId ? '수정 저장' : '등록'}
-              </button>
+        <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50">
+          <div className="bg-white rounded-lg shadow-xl w-full max-w-lg p-6">
+            <div className="flex items-center justify-between mb-4">
+              <h2 className="text-lg font-bold text-gray-800">
+                {editId ? '안전수칙 수정' : '안전수칙 등록'}
+              </h2>
               <button
-                type="button"
                 onClick={() => { setShowForm(false); setEditId(null); setError(''); }}
-                className="border border-gray-300 text-gray-600 px-4 py-2 rounded text-sm hover:bg-gray-50"
-              >
-                취소
-              </button>
+                className="text-gray-400 hover:text-gray-600 text-2xl leading-none"
+              >&times;</button>
             </div>
+            <form onSubmit={handleSubmit} className="space-y-4">
+              {error && <p className="text-sm text-red-500">{error}</p>}
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">업종 *</label>
+                  <input
+                    className="w-full border border-gray-300 rounded px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    placeholder="예: 조선업, 건설업..."
+                    value={form.industry}
+                    onChange={(e) => setForm({ ...form, industry: e.target.value })}
+                    list="industry-list"
+                  />
+                  <datalist id="industry-list">
+                    {industries.map((ind) => <option key={ind} value={ind} />)}
+                  </datalist>
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">제목 *</label>
+                  <input
+                    className="w-full border border-gray-300 rounded px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    placeholder="안전수칙 제목"
+                    value={form.title}
+                    onChange={(e) => setForm({ ...form, title: e.target.value })}
+                  />
+                </div>
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">내용 *</label>
+                <textarea
+                  className="w-full border border-gray-300 rounded px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none"
+                  rows={4}
+                  placeholder="안전수칙 내용을 입력하세요."
+                  value={form.content}
+                  onChange={(e) => setForm({ ...form, content: e.target.value })}
+                />
+              </div>
+              <div className="w-24">
+                <label className="block text-sm font-medium text-gray-700 mb-1">순서</label>
+                <input
+                  type="number"
+                  className="w-full border border-gray-300 rounded px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  value={form.order}
+                  onChange={(e) => setForm({ ...form, order: e.target.value })}
+                />
+              </div>
+              <div className="flex gap-2 pt-2">
+                <button
+                  type="button"
+                  onClick={() => { setShowForm(false); setEditId(null); setError(''); }}
+                  className="flex-1 py-2 border border-gray-300 text-gray-600 text-sm rounded hover:bg-gray-50 transition-colors"
+                >
+                  취소
+                </button>
+                <button
+                  type="submit"
+                  className="flex-1 py-2 bg-blue-700 text-white text-sm rounded hover:bg-blue-800 transition-colors"
+                >
+                  {editId ? '수정 저장' : '등록'}
+                </button>
+              </div>
+            </form>
           </div>
-        </form>
+        </div>
       )}
 
       {/* 업종 필터 */}
       <div className="flex gap-2 mb-4 flex-wrap">
         <button
           onClick={() => setFilterIndustry('')}
-          className={`px-3 py-1.5 rounded text-sm border transition-colors ${
-            filterIndustry === '' ? 'bg-blue-600 text-white border-blue-600' : 'bg-white text-gray-600 border-gray-300 hover:bg-gray-50'
+          className={`px-4 py-1.5 rounded-full text-sm font-medium transition-colors ${
+            filterIndustry === ''
+              ? 'bg-blue-700 text-white'
+              : 'bg-white border border-gray-300 text-gray-600 hover:bg-gray-50'
           }`}
         >
           전체
@@ -193,8 +208,10 @@ export default function AdminSafetyRules() {
           <button
             key={ind}
             onClick={() => setFilterIndustry(ind)}
-            className={`px-3 py-1.5 rounded text-sm border transition-colors ${
-              filterIndustry === ind ? 'bg-blue-600 text-white border-blue-600' : 'bg-white text-gray-600 border-gray-300 hover:bg-gray-50'
+            className={`px-4 py-1.5 rounded-full text-sm font-medium transition-colors ${
+              filterIndustry === ind
+                ? 'bg-blue-700 text-white'
+                : 'bg-white border border-gray-300 text-gray-600 hover:bg-gray-50'
             }`}
           >
             {ind}
@@ -204,48 +221,56 @@ export default function AdminSafetyRules() {
 
       {/* 목록 */}
       {loading ? (
-        <div className="text-center py-12 text-gray-400">불러오는 중...</div>
+        <div className="bg-white rounded-lg border border-gray-200 p-8 text-center text-gray-400">
+          불러오는 중...
+        </div>
       ) : Object.keys(grouped).length === 0 ? (
-        <div className="text-center py-12 text-gray-400">등록된 안전수칙이 없습니다.</div>
+        <div className="bg-white rounded-lg border border-gray-200 p-8 text-center text-gray-400">
+          등록된 안전수칙이 없습니다.
+        </div>
       ) : (
         <div className="space-y-4">
           {Object.entries(grouped).map(([industry, items]) => (
-            <div key={industry} className="bg-white border rounded-lg shadow-sm overflow-hidden">
-              <div className="px-4 py-3 bg-gray-50 border-b flex items-center justify-between">
-                <span className="font-semibold text-gray-700">{industry}</span>
+            <div key={industry} className="bg-white rounded-lg border border-gray-200 overflow-hidden">
+              <div className="px-4 py-2.5 bg-gray-50 border-b border-gray-200 flex items-center justify-between">
+                <span className="text-sm font-semibold text-gray-700">{industry}</span>
                 <span className="text-xs text-gray-400">{items.length}건</span>
               </div>
-              <ul className="divide-y">
-                {items.map((rule) => (
-                  <li key={rule.id}>
-                    <div
-                      className="px-4 py-3 flex items-center justify-between cursor-pointer hover:bg-gray-50"
-                      onClick={() => setExpandedId(expandedId === rule.id ? null : rule.id)}
-                    >
-                      <div className="flex items-center gap-2">
-                        <span className="text-xs text-gray-400 w-5 text-center">{rule.order}</span>
-                        <span className="text-sm font-medium text-gray-800">{rule.title}</span>
-                      </div>
-                      <div className="flex items-center gap-3">
-                        <button
-                          onClick={(e) => { e.stopPropagation(); startEdit(rule); }}
-                          className="text-blue-600 hover:underline text-xs"
-                        >수정</button>
-                        <button
-                          onClick={(e) => { e.stopPropagation(); handleDelete(rule.id); }}
-                          className="text-red-500 hover:underline text-xs"
-                        >삭제</button>
-                        <span className="text-gray-300 text-xs">{expandedId === rule.id ? '▲' : '▼'}</span>
-                      </div>
-                    </div>
-                    {expandedId === rule.id && (
-                      <div className="px-10 py-3 bg-gray-50 text-sm text-gray-700 whitespace-pre-wrap border-t">
-                        {rule.content}
-                      </div>
-                    )}
-                  </li>
-                ))}
-              </ul>
+              <table className="w-full text-sm">
+                <tbody className="divide-y divide-gray-100">
+                  {items.map((rule) => (
+                    <React.Fragment key={rule.id}>
+                      <tr
+                        className="hover:bg-gray-50 transition-colors cursor-pointer"
+                        onClick={() => setExpandedId(expandedId === rule.id ? null : rule.id)}
+                      >
+                        <td className="px-4 py-3 w-10 text-xs text-gray-400 text-center">{rule.order}</td>
+                        <td className="px-4 py-3 font-medium text-gray-800">{rule.title}</td>
+                        <td className="px-4 py-3 text-right">
+                          <div className="flex items-center justify-end gap-2">
+                            <button
+                              onClick={(e) => { e.stopPropagation(); startEdit(rule); }}
+                              className="text-xs text-gray-500 hover:text-blue-700 border border-gray-200 px-2 py-1 rounded hover:border-blue-300 transition-colors"
+                            >수정</button>
+                            <button
+                              onClick={(e) => { e.stopPropagation(); handleDelete(rule.id); }}
+                              className="text-xs text-gray-500 hover:text-red-600 border border-gray-200 px-2 py-1 rounded hover:border-red-300 transition-colors"
+                            >삭제</button>
+                            <span className="text-gray-300 text-xs w-4">{expandedId === rule.id ? '▲' : '▼'}</span>
+                          </div>
+                        </td>
+                      </tr>
+                      {expandedId === rule.id && (
+                        <tr>
+                          <td colSpan={3} className="px-10 py-3 bg-gray-50 text-sm text-gray-700 whitespace-pre-wrap border-t border-gray-100">
+                            {rule.content}
+                          </td>
+                        </tr>
+                      )}
+                    </React.Fragment>
+                  ))}
+                </tbody>
+              </table>
             </div>
           ))}
         </div>

@@ -30,6 +30,8 @@ model User {
   password     String
   name         String
   phone        String?
+  title        String?
+  contactEmail String?
   role         Role      @default(PARTNER)
   isApproved   Boolean   @default(false)
   approvedAt   DateTime?
@@ -50,8 +52,14 @@ model User {
 model Company {
   id           String  @id @default(cuid())
   name         String
+  nameEn       String?
   bizNo        String  @unique
+  phone        String?
+  zipCode      String?
+  address      String?
+  addressDetail String?
   industry     String?
+  industryEtc  String?
   contractDept String?
   isWatchlist  Boolean @default(false)
   createdAt    DateTime @default(now())
@@ -68,18 +76,27 @@ model Company {
 }
 
 model RegistrationRequest {
-  id             String         @id @default(cuid())
-  companyName    String
-  bizNo          String
-  industry       String?
-  contractDept   String?
-  applicantName  String
-  applicantEmail String
-  applicantPhone String?
-  status         ApprovalStatus @default(PENDING)
-  rejectReason   String?
-  reminderSentAt DateTime?
-  approvedAt     DateTime?
+  id                   String         @id @default(cuid())
+  companyName          String
+  companyNameEn        String?
+  bizNo                String
+  companyPhone         String?
+  zipCode              String?
+  address              String?
+  addressDetail        String?
+  industry             String?
+  industryEtc          String?
+  contractDept         String?
+  applicantName        String
+  applicantTitle       String?
+  applicantEmail       String
+  applicantPhone       String?
+  applicantContactEmail String?
+  bizFileKey           String?
+  status               ApprovalStatus @default(PENDING)
+  rejectReason         String?
+  reminderSentAt       DateTime?
+  approvedAt           DateTime?
 
   approvedBy   User?    @relation("ApproverRelation", fields: [approvedById], references: [id])
   approvedById String?
