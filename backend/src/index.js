@@ -18,6 +18,7 @@ const accidentRoutes = require('./routes/accidents');
 const performanceRoutes = require('./routes/performance');
 const safetyRuleRoutes = require('./routes/safetyRules');
 const healthRoutes = require('./routes/health');
+const opinionRoutes = require('./routes/opinions');
 
 const app = express();
 const PORT = process.env.PORT || 4000;
@@ -41,6 +42,7 @@ app.use('/api/accidents', accidentRoutes);
 app.use('/api/performance', performanceRoutes);
 app.use('/api/safety-rules', safetyRuleRoutes);
 app.use('/api/health', healthRoutes);
+app.use('/api/opinions', opinionRoutes);
 
 app.use(errorHandler);
 

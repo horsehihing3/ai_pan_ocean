@@ -32,7 +32,7 @@ const ADMIN_NAV: NavItemDef[] = [
       { label: '사업장(선박) 출입절차', to: null },
       { label: '사업장(선박) 출입신청', to: null },
       { label: '반기평가', to: '/admin/semi-annual' },
-      { label: '근로자 의견조회', to: null },
+      { label: '근로자 의견조회', to: '/admin/opinions' },
     ],
   },
   {
@@ -84,7 +84,7 @@ const PARTNER_NAV: NavItemDef[] = [
       { label: '사업장(선박) 출입절차', to: null },
       { label: '사업장(선박) 출입신청', to: '/partner/visit-requests' },
       { label: '반기평가', to: '/partner/semi-annual' },
-      { label: '근로자 의견조회', to: null },
+      { label: '근로자 의견조회', to: '/partner/opinions' },
       { label: '산업재해 신고', to: '/partner/accidents' },
     ],
   },

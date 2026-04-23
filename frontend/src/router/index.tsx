@@ -40,6 +40,10 @@ import SafetyPolicyPage from '../pages/common/SafetyPolicyPage';
 import SafetyCertificationPage from '../pages/common/SafetyCertificationPage';
 import SafetyGoalsPage from '../pages/common/SafetyGoalsPage';
 
+// Opinion Pages
+import PartnerOpinions from '../pages/partner/PartnerOpinions';
+import AdminOpinions from '../pages/admin/AdminOpinions';
+
 // Layout
 import AppLayout from '../components/layout/AppLayout';
 
@@ -90,6 +94,7 @@ const router = createBrowserRouter([
       { path: 'partner/evaluations', element: <RequireAuth roles={['PARTNER']}><PartnerEvaluations /></RequireAuth> },
       { path: 'partner/semi-annual', element: <RequireAuth roles={['PARTNER']}><PartnerSemiAnnual /></RequireAuth> },
       { path: 'partner/accidents', element: <RequireAuth roles={['PARTNER']}><PartnerAccidents /></RequireAuth> },
+      { path: 'partner/opinions', element: <RequireAuth roles={['PARTNER']}><PartnerOpinions /></RequireAuth> },
       // Admin
       { path: 'admin/dashboard', element: <RequireAuth roles={['ADMIN']}><AdminDashboard /></RequireAuth> },
       { path: 'admin/companies', element: <RequireAuth roles={['ADMIN']}><AdminCompanies /></RequireAuth> },
@@ -102,6 +107,7 @@ const router = createBrowserRouter([
       { path: 'admin/performance', element: <RequireAuth roles={['ADMIN']}><AdminPerformance /></RequireAuth> },
       { path: 'admin/safety-rules', element: <RequireAuth roles={['ADMIN']}><AdminSafetyRules /></RequireAuth> },
       { path: 'admin/health', element: <RequireAuth roles={['ADMIN']}><AdminHealth /></RequireAuth> },
+      { path: 'admin/opinions', element: <RequireAuth roles={['ADMIN']}><AdminOpinions /></RequireAuth> },
       // Contract
       { path: 'contract/evaluations', element: <RequireAuth roles={['CONTRACT_DEPT']}><ContractEvaluations /></RequireAuth> },
       { path: 'contract/performance', element: <RequireAuth roles={['CONTRACT_DEPT']}><ContractPerformance /></RequireAuth> },

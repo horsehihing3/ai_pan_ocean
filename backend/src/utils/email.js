@@ -87,6 +87,27 @@ const sendImprovementRequestEmail = async ({ to, companyName, title, note }) => 
   });
 };
 
+// [2026-04-23] 근로자 의견조회 등록 → 안전경영팀 알림
+const OPINION_TYPE_LABEL = {
+  NEAR_MISS: '아차사고',
+  ACCIDENT_REPORT: '산업재해조사표',
+  GENERAL: '일반문의',
+};
+
+const sendOpinionNotifyToAdmin = async ({ adminEmail, companyName, type, title }) => {
+  await sendMail({
+    to: adminEmail,
+    subject: `[팬오션] 근로자 의견 접수 - ${OPINION_TYPE_LABEL[type]} / ${companyName}`,
+    html: `
+      <h2>근로자 의견조회가 접수되었습니다.</h2>
+      <p><strong>업체명:</strong> ${companyName}</p>
+      <p><strong>구분:</strong> ${OPINION_TYPE_LABEL[type]}</p>
+      <p><strong>제목:</strong> ${title}</p>
+      <p>포털 관리자 페이지에서 내용을 확인해 주세요.</p>
+    `,
+  });
+};
+
 module.exports = {
   sendMail,
   sendRegistrationNotifyToAdmin,
@@ -94,4 +115,5 @@ module.exports = {
   sendApprovalEmail,
   sendRejectionEmail,
   sendImprovementRequestEmail,
+  sendOpinionNotifyToAdmin,
 };

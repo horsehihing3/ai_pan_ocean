@@ -24,6 +24,12 @@ enum ReviewStatus {
   COMPLETED
 }
 
+enum OpinionType {
+  NEAR_MISS
+  ACCIDENT_REPORT
+  GENERAL
+}
+
 model User {
   id           String    @id @default(cuid())
   email        String    @unique
@@ -45,6 +51,7 @@ model User {
   visitRequests    VisitRequest[]
   evaluationsGiven Evaluation[]          @relation("EvaluatorRelation")
   approvals        RegistrationRequest[] @relation("ApproverRelation")
+  workerOpinions   WorkerOpinion[]
 
   @@map("users")
 }
@@ -70,6 +77,7 @@ model Company {
   evaluations         Evaluation[]
   semiAnnualEvals     SemiAnnualEvaluation[]
   accidents           Accident[]
+  workerOpinions      WorkerOpinion[]
   registrationRequest RegistrationRequest?
 
   @@map("companies")
@@ -297,6 +305,24 @@ model Notice {
   updatedAt DateTime @updatedAt
 
   @@map("notices")
+}
+
+model WorkerOpinion {
+  id            String      @id @default(cuid())
+  type          OpinionType
+  title         String
+  content       String
+  isAnonymous   Boolean     @default(false)
+  consentAgreed Boolean     @default(false)
+  createdAt     DateTime    @default(now())
+  updatedAt     DateTime    @updatedAt
+
+  company       Company @relation(fields: [companyId], references: [id])
+  companyId     String
+  submittedBy   User    @relation(fields: [submittedById], references: [id])
+  submittedById String
+
+  @@map("worker_opinions")
 }
 
 model SafetyRule {
