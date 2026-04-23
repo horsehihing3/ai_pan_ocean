@@ -134,12 +134,14 @@ export default function PartnerOpinions() {
   const fmt = (d: string) =>
     new Date(d).toLocaleDateString('ko-KR', { year: 'numeric', month: '2-digit', day: '2-digit' });
 
+  const LABEL_CLS = 'w-24 shrink-0 px-4 py-3 bg-gray-50 text-sm font-medium text-gray-700 self-stretch flex items-center';
+
   const field = (label: string, child: React.ReactNode, required = false) => (
-    <div className="grid grid-cols-[120px_1fr] border-b border-gray-200 items-center">
-      <div className="px-4 py-3 bg-gray-50 text-sm font-medium text-gray-700 self-stretch flex items-center">
+    <div className="flex border-b border-gray-200 items-center">
+      <div className={LABEL_CLS}>
         {label}{required && <span className="text-red-500 ml-0.5">*</span>}
       </div>
-      <div className="px-4 py-2.5">{child}</div>
+      <div className="flex-1 px-4 py-2.5">{child}</div>
     </div>
   );
 
@@ -203,19 +205,15 @@ export default function PartnerOpinions() {
 
           {/* 이름 + 이메일 */}
           <div className="grid grid-cols-2 border-b border-gray-200">
-            <div className="grid grid-cols-[100px_1fr] items-center border-r border-gray-200">
-              <div className="px-4 py-3 bg-gray-50 text-sm font-medium text-gray-700 self-stretch flex items-center">
-                이름<span className="text-red-500 ml-0.5">*</span>
-              </div>
-              <div className="px-4 py-2.5">
+            <div className="flex items-center border-r border-gray-200">
+              <div className={LABEL_CLS}>이름<span className="text-red-500 ml-0.5">*</span></div>
+              <div className="flex-1 px-4 py-2.5">
                 <input value={form.writerName} onChange={(e) => setForm((p) => ({ ...p, writerName: e.target.value }))} placeholder="이름을 입력해주세요" className={inputCls} />
               </div>
             </div>
-            <div className="grid grid-cols-[100px_1fr] items-center">
-              <div className="px-4 py-3 bg-gray-50 text-sm font-medium text-gray-700 self-stretch flex items-center">
-                이메일<span className="text-red-500 ml-0.5">*</span>
-              </div>
-              <div className="px-4 py-2.5">
+            <div className="flex items-center">
+              <div className={LABEL_CLS}>이메일<span className="text-red-500 ml-0.5">*</span></div>
+              <div className="flex-1 px-4 py-2.5">
                 <input value={form.writerEmail} onChange={(e) => setForm((p) => ({ ...p, writerEmail: e.target.value }))} placeholder="이메일을 입력해주세요" className={inputCls} />
               </div>
             </div>
@@ -223,15 +221,15 @@ export default function PartnerOpinions() {
 
           {/* 회사명 + 업종 */}
           <div className="grid grid-cols-2 border-b border-gray-200">
-            <div className="grid grid-cols-[100px_1fr] items-center border-r border-gray-200">
-              <div className="px-4 py-3 bg-gray-50 text-sm font-medium text-gray-700 self-stretch flex items-center">회사명</div>
-              <div className="px-4 py-2.5">
+            <div className="flex items-center border-r border-gray-200">
+              <div className={LABEL_CLS}>회사명</div>
+              <div className="flex-1 px-4 py-2.5">
                 <input value={form.companyName} onChange={(e) => setForm((p) => ({ ...p, companyName: e.target.value }))} placeholder="회사명을 입력해주세요" className={inputCls} />
               </div>
             </div>
-            <div className="grid grid-cols-[100px_1fr] items-center">
-              <div className="px-4 py-3 bg-gray-50 text-sm font-medium text-gray-700 self-stretch flex items-center">업종</div>
-              <div className="px-4 py-2.5">
+            <div className="flex items-center">
+              <div className={LABEL_CLS}>업종</div>
+              <div className="flex-1 px-4 py-2.5">
                 <input value={form.industry} onChange={(e) => setForm((p) => ({ ...p, industry: e.target.value }))} placeholder="업종을 입력해주세요" className={inputCls} />
               </div>
             </div>
@@ -239,25 +237,19 @@ export default function PartnerOpinions() {
 
           {/* 연락처 + 보안문자 */}
           <div className="grid grid-cols-2 border-b border-gray-200">
-            <div className="grid grid-cols-[100px_1fr] items-center border-r border-gray-200">
-              <div className="px-4 py-3 bg-gray-50 text-sm font-medium text-gray-700 self-stretch flex items-center">연락처</div>
-              <div className="px-4 py-2.5">
+            <div className="flex items-center border-r border-gray-200">
+              <div className={LABEL_CLS}>연락처</div>
+              <div className="flex-1 px-4 py-2.5">
                 <input value={form.writerPhone} onChange={(e) => setForm((p) => ({ ...p, writerPhone: e.target.value }))} placeholder="연락처를 입력해주세요" className={inputCls} />
               </div>
             </div>
-            <div className="grid grid-cols-[100px_1fr] items-center">
-              <div className="px-4 py-3 bg-gray-50 text-sm font-medium text-gray-700 self-stretch flex items-center">보안문자<span className="text-red-500 ml-0.5">*</span></div>
-              <div className="px-4 py-2.5 flex items-center gap-3">
+            <div className="flex items-center">
+              <div className={LABEL_CLS}>보안문자<span className="text-red-500 ml-0.5">*</span></div>
+              <div className="flex-1 px-4 py-2.5 flex items-center gap-3">
                 <span className="inline-block bg-blue-700 text-white font-bold text-lg px-4 py-1.5 rounded select-none tracking-widest min-w-[72px] text-center">
                   {captcha}
                 </span>
-                <input
-                  value={captchaInput}
-                  onChange={(e) => setCaptchaInput(e.target.value)}
-                  placeholder="보안문자를 입력해주세요"
-                  className={inputCls}
-                  maxLength={4}
-                />
+                <input value={captchaInput} onChange={(e) => setCaptchaInput(e.target.value)} placeholder="보안문자 입력" className={inputCls} maxLength={4} />
               </div>
             </div>
           </div>
@@ -268,9 +260,9 @@ export default function PartnerOpinions() {
           ), true)}
 
           {/* 내용 + 파일 */}
-          <div className="grid grid-cols-[120px_1fr] border-b border-gray-200">
-            <div className="px-4 py-3 bg-gray-50 text-sm font-medium text-gray-700 self-stretch flex items-center">내용</div>
-            <div className="px-4 py-2.5 space-y-2">
+          <div className="flex border-b border-gray-200">
+            <div className={LABEL_CLS}>내용</div>
+            <div className="flex-1 px-4 py-2.5 space-y-2">
               <textarea
                 value={form.content}
                 onChange={(e) => setForm((p) => ({ ...p, content: e.target.value }))}
