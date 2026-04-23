@@ -46,3 +46,7 @@ export const getAllOpinionsApi = (type?: OpinionType) =>
 // 관리자: 답변 작성
 export const replyOpinionApi = (id: string, adminReply: string) =>
   api.patch(`/opinions/${id}/reply`, { adminReply });
+
+// 공통: 파일 다운로드 URL
+export const getOpinionFileUrlApi = (id: string) =>
+  api.get(`/opinions/${id}/file`);

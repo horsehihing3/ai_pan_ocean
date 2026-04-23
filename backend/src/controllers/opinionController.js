@@ -1,7 +1,7 @@
 const prisma = require('../utils/prisma');
 const { AppError } = require('../middleware/errorHandler');
 const { sendOpinionNotifyToAdmin } = require('../utils/email');
-const { uploadToS3 } = require('../utils/s3');
+const { uploadToS3, getPresignedUrl } = require('../utils/s3');
 
 const ADMIN_EMAIL = process.env.EMAIL_USER;
 
@@ -130,4 +130,13 @@ const replyOpinion = async (req, res) => {
   res.json({ success: true, data: updated });
 };
 
-module.exports = { createOpinion, getOpinions, getAllOpinions, replyOpinion };
+// 파일 다운로드 Presigned URL
+const getOpinionFileUrl = async (req, res) => {
+  const { id } = req.params;
+  const opinion = await prisma.workerOpinion.findUnique({ where: { id }, select: { fileKey: true, fileName: true } });
+  if (!opinion?.fileKey) throw new AppError('첨부파일이 없습니다.', 404);
+  const url = await getPresignedUrl(opinion.fileKey, opinion.fileName);
+  res.json({ success: true, data: { url } });
+};
+
+module.exports = { createOpinion, getOpinions, getAllOpinions, replyOpinion, getOpinionFileUrl };
