@@ -1,6 +1,7 @@
 const prisma = require('../utils/prisma');
 const { AppError } = require('../middleware/errorHandler');
 const { sendOpinionNotifyToAdmin } = require('../utils/email');
+const { uploadToS3 } = require('../utils/s3');
 
 const ADMIN_EMAIL = process.env.EMAIL_USER;
 
@@ -8,7 +9,10 @@ const ADMIN_EMAIL = process.env.EMAIL_USER;
 
 // PARTNER: 의견 등록
 const createOpinion = async (req, res) => {
-  const { type, title, content, isAnonymous, consentAgreed } = req.body;
+  const {
+    type, title, content, isAnonymous, consentAgreed,
+    writerName, writerEmail, writerPhone, companyName, industry,
+  } = req.body;
   const userId = req.user.id;
 
   if (!type || !title?.trim() || !content?.trim()) {
@@ -24,13 +28,29 @@ const createOpinion = async (req, res) => {
   });
   if (!user?.company) throw new AppError('소속 업체 정보가 없습니다.');
 
+  // 파일 업로드 처리
+  let fileKey = null;
+  let fileName = null;
+  if (req.file) {
+    const originalName = Buffer.from(req.file.originalname, 'latin1').toString('utf8');
+    fileKey = await uploadToS3(req.file.buffer, originalName, req.file.mimetype, 'opinions');
+    fileName = originalName;
+  }
+
   const opinion = await prisma.workerOpinion.create({
     data: {
       type,
       title: title.trim(),
       content: content.trim(),
-      isAnonymous: isAnonymous ?? false,
+      isAnonymous: isAnonymous === 'true' || isAnonymous === true,
       consentAgreed: true,
+      writerName: writerName?.trim() || null,
+      writerEmail: writerEmail?.trim() || null,
+      writerPhone: writerPhone?.trim() || null,
+      companyName: companyName?.trim() || null,
+      industry: industry?.trim() || null,
+      fileKey,
+      fileName,
       companyId: user.company.id,
       submittedById: userId,
     },

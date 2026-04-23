@@ -92,7 +92,8 @@ frontend/src/api/      (axios instance)
 
 | 파일 | 내용 |
 |------|------|
-| `PROJECT_CONTEXT.md` | 현재 TODO · 완료 이력 · 이슈 |
+| `PROJECT_CONTEXT.md` | 현재 TODO · 완료 이력 · 진척도 · 이슈 |
+| `팬오션 안전보건Dx_최종안.pptx` | **원본 기획서** — 전체 화면 설계·기능 요구사항 (30슬라이드) |
 | `docs/domain.md` | 도메인 용어 · 업무 흐름 상세 |
 | `docs/api-rules.md` | API 설계 규칙 · 엔드포인트 목록 |
 | `docs/errors.md` | 반복 에러 & 해결책 모음 |

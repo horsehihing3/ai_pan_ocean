@@ -91,7 +91,7 @@ const logout = async (req, res) => {
 const getMe = async (req, res) => {
   const user = await prisma.user.findUnique({
     where: { id: req.user.id },
-    select: { id: true, email: true, name: true, phone: true, role: true, companyId: true, company: { select: { name: true, bizNo: true } } },
+    select: { id: true, email: true, name: true, phone: true, role: true, companyId: true, company: { select: { name: true, bizNo: true, industry: true } } },
   });
   res.json({ success: true, data: user });
 };

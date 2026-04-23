@@ -314,6 +314,13 @@ model WorkerOpinion {
   content       String
   isAnonymous   Boolean     @default(false)
   consentAgreed Boolean     @default(false)
+  writerName    String?
+  writerEmail   String?
+  writerPhone   String?
+  companyName   String?
+  industry      String?
+  fileKey       String?
+  fileName      String?
   adminReply    String?
   repliedAt     DateTime?
   createdAt     DateTime    @default(now())
