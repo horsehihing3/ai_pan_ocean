@@ -269,12 +269,15 @@ export default function AppLayout() {
       {/* 상단 네비게이션 바 */}
       <header className="bg-blue-900 text-white h-14 flex items-center px-4 shrink-0 shadow-md z-30">
         {/* 로고 */}
-        <div className="flex items-center gap-2 mr-4 shrink-0">
-          <div className="text-sm font-bold leading-tight">
+        <button
+          onClick={() => navigate('/')}
+          className="flex items-center gap-2 mr-4 shrink-0 hover:opacity-80 transition-opacity"
+        >
+          <div className="text-sm font-bold leading-tight text-left">
             <div>팬오션</div>
             <div className="text-xs text-blue-300 font-normal">안전보건 포털</div>
           </div>
-        </div>
+        </button>
         <div className="w-px h-6 bg-blue-700 mr-3 shrink-0" />
 
         {/* 대메뉴 */}

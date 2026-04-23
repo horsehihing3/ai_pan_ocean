@@ -314,6 +314,8 @@ model WorkerOpinion {
   content       String
   isAnonymous   Boolean     @default(false)
   consentAgreed Boolean     @default(false)
+  adminReply    String?
+  repliedAt     DateTime?
   createdAt     DateTime    @default(now())
   updatedAt     DateTime    @updatedAt
 

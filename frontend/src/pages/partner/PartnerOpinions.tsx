@@ -1,11 +1,13 @@
 import { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import {
-  createOpinionApi, getMyOpinionsApi,
+  createOpinionApi, getOpinionsApi,
   OPINION_TYPE_LABEL, type OpinionType,
 } from '../../api/opinions';
+import useAuthStore from '../../store/authStore';
 
 // [2026-04-23] 협력업체 근로자 의견조회 (PPT 슬라이드 16, 17)
+// [2026-04-23] 전체 의견 조회 + 관리자 답변 표시
 
 type Opinion = {
   id: string;
@@ -13,7 +15,10 @@ type Opinion = {
   title: string;
   content: string;
   isAnonymous: boolean;
+  adminReply: string | null;
+  repliedAt: string | null;
   createdAt: string;
+  company: { name: string };
   submittedBy: { name: string };
 };
 
@@ -30,24 +35,31 @@ const CONSENT_TEXT = `[개인정보 수집·이용 동의]
 
 const EMPTY_FORM = { type: 'GENERAL' as OpinionType, title: '', content: '', isAnonymous: false };
 
+const TYPE_COLOR: Record<OpinionType, string> = {
+  NEAR_MISS: 'bg-orange-100 text-orange-700',
+  ACCIDENT_REPORT: 'bg-red-100 text-red-700',
+  GENERAL: 'bg-blue-100 text-blue-700',
+};
+
 export default function PartnerOpinions() {
   const queryClient = useQueryClient();
+  const { user } = useAuthStore();
+  const [filterType, setFilterType] = useState<OpinionType | ''>('');
   const [showForm, setShowForm] = useState(false);
   const [showConsent, setShowConsent] = useState(false);
-  const [consentAgreed, setConsentAgreed] = useState(false);
   const [form, setForm] = useState(EMPTY_FORM);
   const [formError, setFormError] = useState('');
   const [detailTarget, setDetailTarget] = useState<Opinion | null>(null);
 
   const { data: opinions = [], isLoading } = useQuery<Opinion[]>({
-    queryKey: ['opinions-my'],
-    queryFn: () => getMyOpinionsApi().then((r) => r.data.data),
+    queryKey: ['opinions-partner', filterType],
+    queryFn: () => getOpinionsApi(filterType || undefined).then((r) => r.data.data),
   });
 
   const createMutation = useMutation({
     mutationFn: (d: Parameters<typeof createOpinionApi>[0]) => createOpinionApi(d),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['opinions-my'] });
+      queryClient.invalidateQueries({ queryKey: ['opinions-partner'] });
       closeForm();
     },
     onError: (err: any) => setFormError(err.response?.data?.message || '등록에 실패했습니다.'),
@@ -55,7 +67,6 @@ export default function PartnerOpinions() {
 
   const openForm = () => {
     setForm(EMPTY_FORM);
-    setConsentAgreed(false);
     setFormError('');
     setShowConsent(true);
   };
@@ -63,13 +74,11 @@ export default function PartnerOpinions() {
   const closeForm = () => {
     setShowForm(false);
     setShowConsent(false);
-    setConsentAgreed(false);
     setForm(EMPTY_FORM);
     setFormError('');
   };
 
   const handleConsentAgree = () => {
-    setConsentAgreed(true);
     setShowConsent(false);
     setShowForm(true);
   };
@@ -85,11 +94,7 @@ export default function PartnerOpinions() {
   const fmt = (d: string) =>
     new Date(d).toLocaleDateString('ko-KR', { year: 'numeric', month: '2-digit', day: '2-digit' });
 
-  const TYPE_COLOR: Record<OpinionType, string> = {
-    NEAR_MISS: 'bg-orange-100 text-orange-700',
-    ACCIDENT_REPORT: 'bg-red-100 text-red-700',
-    GENERAL: 'bg-blue-100 text-blue-700',
-  };
+  const answeredCount = opinions.filter((o) => o.adminReply).length;
 
   return (
     <div className="p-8">
@@ -107,7 +112,11 @@ export default function PartnerOpinions() {
       </div>
 
       {/* 요약 카드 */}
-      <div className="grid grid-cols-3 gap-4 mb-6">
+      <div className="grid grid-cols-4 gap-4 mb-6">
+        <div className="bg-white rounded-lg border border-gray-200 p-4">
+          <div className="text-sm text-gray-500">전체 접수</div>
+          <div className="text-2xl font-bold mt-1 text-gray-700">{opinions.length}</div>
+        </div>
         {OPINION_TYPES.map((t) => (
           <div key={t} className="bg-white rounded-lg border border-gray-200 p-4">
             <div className="text-sm text-gray-500">{OPINION_TYPE_LABEL[t]}</div>
@@ -116,6 +125,32 @@ export default function PartnerOpinions() {
             </div>
           </div>
         ))}
+      </div>
+
+      {/* 필터 */}
+      <div className="flex gap-2 mb-4">
+        <button
+          onClick={() => setFilterType('')}
+          className={`px-3 py-1.5 text-sm rounded border transition-colors ${
+            filterType === '' ? 'bg-blue-700 text-white border-blue-700' : 'border-gray-300 text-gray-600 hover:bg-gray-50'
+          }`}
+        >
+          전체
+        </button>
+        {OPINION_TYPES.map((t) => (
+          <button
+            key={t}
+            onClick={() => setFilterType(t)}
+            className={`px-3 py-1.5 text-sm rounded border transition-colors ${
+              filterType === t ? 'bg-blue-700 text-white border-blue-700' : 'border-gray-300 text-gray-600 hover:bg-gray-50'
+            }`}
+          >
+            {OPINION_TYPE_LABEL[t]}
+          </button>
+        ))}
+        <span className="ml-auto text-sm text-gray-500 self-center">
+          답변 완료 {answeredCount}건
+        </span>
       </div>
 
       {/* 목록 */}
@@ -131,7 +166,7 @@ export default function PartnerOpinions() {
           <table className="w-full text-sm">
             <thead>
               <tr className="bg-gray-50 border-b border-gray-200">
-                {['구분', '제목', '제출자', '익명', '접수일', ''].map((h) => (
+                {['구분', '업체명', '제목', '제출자', '답변', '접수일', ''].map((h) => (
                   <th key={h} className="text-left px-4 py-3 text-xs font-semibold text-gray-500 uppercase">{h}</th>
                 ))}
               </tr>
@@ -144,11 +179,20 @@ export default function PartnerOpinions() {
                       {OPINION_TYPE_LABEL[o.type]}
                     </span>
                   </td>
+                  <td className="px-4 py-3 text-gray-600 text-xs">{o.company.name}</td>
                   <td className="px-4 py-3 font-medium text-gray-800">{o.title}</td>
                   <td className="px-4 py-3 text-gray-600">
                     {o.isAnonymous ? <span className="text-gray-400">익명</span> : o.submittedBy.name}
                   </td>
-                  <td className="px-4 py-3 text-gray-500">{o.isAnonymous ? 'Y' : 'N'}</td>
+                  <td className="px-4 py-3">
+                    {o.adminReply ? (
+                      <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-green-100 text-green-700">
+                        답변완료
+                      </span>
+                    ) : (
+                      <span className="text-xs text-gray-400">대기중</span>
+                    )}
+                  </td>
                   <td className="px-4 py-3 text-gray-500">{fmt(o.createdAt)}</td>
                   <td className="px-4 py-3">
                     <button
@@ -286,7 +330,7 @@ export default function PartnerOpinions() {
       {/* 상세 모달 */}
       {detailTarget && (
         <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50">
-          <div className="bg-white rounded-lg shadow-xl w-full max-w-md p-6">
+          <div className="bg-white rounded-lg shadow-xl w-full max-w-md p-6 max-h-[90vh] overflow-y-auto">
             <div className="flex items-center justify-between mb-4">
               <h2 className="text-lg font-bold text-gray-800">의견 상세</h2>
               <button onClick={() => setDetailTarget(null)} className="text-gray-400 hover:text-gray-600 text-2xl leading-none">&times;</button>
@@ -299,6 +343,10 @@ export default function PartnerOpinions() {
                     {OPINION_TYPE_LABEL[detailTarget.type]}
                   </span>
                 </dd>
+              </div>
+              <div className="flex">
+                <dt className="w-16 text-gray-500 shrink-0">업체명</dt>
+                <dd className="text-gray-700">{detailTarget.company.name}</dd>
               </div>
               <div className="flex">
                 <dt className="w-16 text-gray-500 shrink-0">제목</dt>
@@ -318,6 +366,28 @@ export default function PartnerOpinions() {
                 <dt className="text-gray-500 mb-1">내용</dt>
                 <dd className="text-gray-800 bg-gray-50 rounded p-3 whitespace-pre-wrap">{detailTarget.content}</dd>
               </div>
+
+              {/* 관리자 답변 영역 */}
+              {detailTarget.adminReply ? (
+                <div className="border-t border-gray-100 pt-3">
+                  <dt className="text-gray-500 mb-1 flex items-center gap-2">
+                    안전경영팀 답변
+                    <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-green-100 text-green-700">
+                      답변완료
+                    </span>
+                    {detailTarget.repliedAt && (
+                      <span className="text-xs text-gray-400">{fmt(detailTarget.repliedAt)}</span>
+                    )}
+                  </dt>
+                  <dd className="text-gray-800 bg-blue-50 rounded p-3 whitespace-pre-wrap border border-blue-100">
+                    {detailTarget.adminReply}
+                  </dd>
+                </div>
+              ) : (
+                <div className="border-t border-gray-100 pt-3">
+                  <p className="text-sm text-gray-400">아직 답변이 등록되지 않았습니다.</p>
+                </div>
+              )}
             </div>
             <button
               onClick={() => setDetailTarget(null)}

@@ -36,7 +36,6 @@ const createOpinion = async (req, res) => {
     },
   });
 
-  // 팀메일 발송 (실패해도 등록은 유지)
   try {
     await sendOpinionNotifyToAdmin({
       adminEmail: ADMIN_EMAIL,
@@ -51,22 +50,17 @@ const createOpinion = async (req, res) => {
   res.status(201).json({ success: true, data: opinion });
 };
 
-// PARTNER: 본인 업체 의견 목록
-const getMyOpinions = async (req, res) => {
-  const userId = req.user.id;
-
-  const user = await prisma.user.findUnique({
-    where: { id: userId },
-    select: { companyId: true },
-  });
-  if (!user?.companyId) {
-    return res.json({ success: true, data: [] });
-  }
+// PARTNER: 전체 의견 목록 (전체 조회 - 안전사고 공유 목적)
+const getOpinions = async (req, res) => {
+  const { type } = req.query;
+  const where = {};
+  if (type) where.type = type;
 
   const opinions = await prisma.workerOpinion.findMany({
-    where: { companyId: user.companyId },
+    where,
     orderBy: { createdAt: 'desc' },
     include: {
+      company: { select: { name: true } },
       submittedBy: { select: { name: true } },
     },
   });
@@ -74,10 +68,9 @@ const getMyOpinions = async (req, res) => {
   res.json({ success: true, data: opinions });
 };
 
-// ADMIN: 전체 의견 목록 (필터: type)
+// ADMIN: 전체 의견 목록
 const getAllOpinions = async (req, res) => {
   const { type } = req.query;
-
   const where = {};
   if (type) where.type = type;
 
@@ -93,4 +86,26 @@ const getAllOpinions = async (req, res) => {
   res.json({ success: true, data: opinions });
 };
 
-module.exports = { createOpinion, getMyOpinions, getAllOpinions };
+// ADMIN: 답변 작성
+const replyOpinion = async (req, res) => {
+  const { id } = req.params;
+  const { adminReply } = req.body;
+
+  if (!adminReply?.trim()) throw new AppError('답변 내용을 입력해 주세요.');
+
+  const opinion = await prisma.workerOpinion.findUnique({ where: { id } });
+  if (!opinion) throw new AppError('의견을 찾을 수 없습니다.', 404);
+
+  const updated = await prisma.workerOpinion.update({
+    where: { id },
+    data: { adminReply: adminReply.trim(), repliedAt: new Date() },
+    include: {
+      company: { select: { name: true, bizNo: true } },
+      submittedBy: { select: { name: true } },
+    },
+  });
+
+  res.json({ success: true, data: updated });
+};
+
+module.exports = { createOpinion, getOpinions, getAllOpinions, replyOpinion };

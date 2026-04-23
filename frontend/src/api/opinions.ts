@@ -17,7 +17,14 @@ export const createOpinionApi = (data: {
   consentAgreed: boolean;
 }) => api.post('/opinions', data);
 
-export const getMyOpinionsApi = () => api.get('/opinions/my');
+// 협력업체: 전체 목록 조회
+export const getOpinionsApi = (type?: OpinionType) =>
+  api.get('/opinions/list', { params: type ? { type } : {} });
 
+// 관리자: 전체 목록 조회
 export const getAllOpinionsApi = (type?: OpinionType) =>
   api.get('/opinions', { params: type ? { type } : {} });
+
+// 관리자: 답변 작성
+export const replyOpinionApi = (id: string, adminReply: string) =>
+  api.patch(`/opinions/${id}/reply`, { adminReply });

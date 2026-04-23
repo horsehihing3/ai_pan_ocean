@@ -1,10 +1,11 @@
 import { useState } from 'react';
-import { useQuery } from '@tanstack/react-query';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import {
-  getAllOpinionsApi, OPINION_TYPE_LABEL, type OpinionType,
+  getAllOpinionsApi, replyOpinionApi,
+  OPINION_TYPE_LABEL, type OpinionType,
 } from '../../api/opinions';
 
-// [2026-04-23] 관리자 근로자 의견조회 전체 목록
+// [2026-04-23] 관리자 근로자 의견조회 + 답변 작성
 
 type Opinion = {
   id: string;
@@ -12,6 +13,8 @@ type Opinion = {
   title: string;
   content: string;
   isAnonymous: boolean;
+  adminReply: string | null;
+  repliedAt: string | null;
   createdAt: string;
   company: { name: string; bizNo: string };
   submittedBy: { name: string };
@@ -26,26 +29,60 @@ const TYPE_COLOR: Record<OpinionType, string> = {
 };
 
 export default function AdminOpinions() {
+  const queryClient = useQueryClient();
   const [filterType, setFilterType] = useState<OpinionType | ''>('');
   const [detailTarget, setDetailTarget] = useState<Opinion | null>(null);
+  const [replyText, setReplyText] = useState('');
+  const [replyError, setReplyError] = useState('');
 
   const { data: opinions = [], isLoading } = useQuery<Opinion[]>({
     queryKey: ['opinions-admin', filterType],
     queryFn: () => getAllOpinionsApi(filterType || undefined).then((r) => r.data.data),
   });
 
+  const replyMutation = useMutation({
+    mutationFn: ({ id, text }: { id: string; text: string }) => replyOpinionApi(id, text),
+    onSuccess: (res) => {
+      queryClient.invalidateQueries({ queryKey: ['opinions-admin'] });
+      setDetailTarget(res.data.data);
+      setReplyText('');
+      setReplyError('');
+    },
+    onError: (err: any) => setReplyError(err.response?.data?.message || '답변 저장에 실패했습니다.'),
+  });
+
+  const openDetail = (o: Opinion) => {
+    setDetailTarget(o);
+    setReplyText(o.adminReply || '');
+    setReplyError('');
+  };
+
+  const closeDetail = () => {
+    setDetailTarget(null);
+    setReplyText('');
+    setReplyError('');
+  };
+
+  const handleReply = () => {
+    if (!replyText.trim()) { setReplyError('답변 내용을 입력해 주세요.'); return; }
+    if (!detailTarget) return;
+    replyMutation.mutate({ id: detailTarget.id, text: replyText });
+  };
+
   const fmt = (d: string) =>
     new Date(d).toLocaleDateString('ko-KR', { year: 'numeric', month: '2-digit', day: '2-digit' });
+
+  const answeredCount = opinions.filter((o) => o.adminReply).length;
 
   return (
     <div className="p-8">
       <div className="mb-6">
         <h1 className="text-2xl font-bold text-gray-800">근로자 의견조회 관리</h1>
-        <p className="text-sm text-gray-500 mt-1">협력업체 근로자가 접수한 의견 전체를 조회합니다.</p>
+        <p className="text-sm text-gray-500 mt-1">협력업체 근로자 의견을 조회하고 답변을 작성합니다.</p>
       </div>
 
       {/* 요약 카드 */}
-      <div className="grid grid-cols-4 gap-4 mb-6">
+      <div className="grid grid-cols-5 gap-4 mb-6">
         <div className="bg-white rounded-lg border border-gray-200 p-4">
           <div className="text-sm text-gray-500">전체</div>
           <div className="text-2xl font-bold mt-1 text-gray-700">{opinions.length}</div>
@@ -58,6 +95,10 @@ export default function AdminOpinions() {
             </div>
           </div>
         ))}
+        <div className="bg-white rounded-lg border border-green-200 p-4">
+          <div className="text-sm text-gray-500">답변완료</div>
+          <div className="text-2xl font-bold mt-1 text-green-600">{answeredCount}</div>
+        </div>
       </div>
 
       {/* 필터 */}
@@ -93,7 +134,7 @@ export default function AdminOpinions() {
           <table className="w-full text-sm">
             <thead>
               <tr className="bg-gray-50 border-b border-gray-200">
-                {['구분', '업체명', '제목', '제출자', '익명', '접수일', ''].map((h) => (
+                {['구분', '업체명', '제목', '제출자', '답변', '접수일', ''].map((h) => (
                   <th key={h} className="text-left px-4 py-3 text-xs font-semibold text-gray-500 uppercase">{h}</th>
                 ))}
               </tr>
@@ -111,14 +152,24 @@ export default function AdminOpinions() {
                   <td className="px-4 py-3 text-gray-600">
                     {o.isAnonymous ? <span className="text-gray-400">익명</span> : o.submittedBy.name}
                   </td>
-                  <td className="px-4 py-3 text-gray-500">{o.isAnonymous ? 'Y' : 'N'}</td>
+                  <td className="px-4 py-3">
+                    {o.adminReply ? (
+                      <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-green-100 text-green-700">
+                        답변완료
+                      </span>
+                    ) : (
+                      <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-yellow-100 text-yellow-700">
+                        미답변
+                      </span>
+                    )}
+                  </td>
                   <td className="px-4 py-3 text-gray-500">{fmt(o.createdAt)}</td>
                   <td className="px-4 py-3">
                     <button
-                      onClick={() => setDetailTarget(o)}
+                      onClick={() => openDetail(o)}
                       className="text-xs text-blue-500 hover:text-blue-700"
                     >
-                      상세
+                      {o.adminReply ? '상세' : '답변'}
                     </button>
                   </td>
                 </tr>
@@ -128,14 +179,16 @@ export default function AdminOpinions() {
         )}
       </div>
 
-      {/* 상세 모달 */}
+      {/* 상세 + 답변 모달 */}
       {detailTarget && (
         <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50">
-          <div className="bg-white rounded-lg shadow-xl w-full max-w-md p-6">
+          <div className="bg-white rounded-lg shadow-xl w-full max-w-lg p-6 max-h-[90vh] overflow-y-auto">
             <div className="flex items-center justify-between mb-4">
-              <h2 className="text-lg font-bold text-gray-800">의견 상세</h2>
-              <button onClick={() => setDetailTarget(null)} className="text-gray-400 hover:text-gray-600 text-2xl leading-none">&times;</button>
+              <h2 className="text-lg font-bold text-gray-800">의견 상세 및 답변</h2>
+              <button onClick={closeDetail} className="text-gray-400 hover:text-gray-600 text-2xl leading-none">&times;</button>
             </div>
+
+            {/* 의견 내용 */}
             <div className="space-y-3 text-sm mb-5">
               <div className="flex">
                 <dt className="w-16 text-gray-500 shrink-0">구분</dt>
@@ -168,12 +221,41 @@ export default function AdminOpinions() {
                 <dd className="text-gray-800 bg-gray-50 rounded p-3 whitespace-pre-wrap">{detailTarget.content}</dd>
               </div>
             </div>
-            <button
-              onClick={() => setDetailTarget(null)}
-              className="w-full py-2 bg-blue-700 text-white text-sm rounded hover:bg-blue-800 transition-colors"
-            >
-              닫기
-            </button>
+
+            {/* 답변 작성/수정 */}
+            <div className="border-t border-gray-100 pt-4">
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                안전경영팀 답변
+                {detailTarget.adminReply && detailTarget.repliedAt && (
+                  <span className="ml-2 text-xs text-gray-400 font-normal">
+                    (최종 답변: {fmt(detailTarget.repliedAt)})
+                  </span>
+                )}
+              </label>
+              <textarea
+                value={replyText}
+                onChange={(e) => setReplyText(e.target.value)}
+                rows={4}
+                placeholder="답변 내용을 입력해 주세요."
+                className="w-full border border-gray-300 rounded px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none mb-2"
+              />
+              {replyError && <p className="text-xs text-red-500 mb-2">{replyError}</p>}
+              <div className="flex gap-2">
+                <button
+                  onClick={closeDetail}
+                  className="flex-1 py-2 border border-gray-300 text-gray-600 text-sm rounded hover:bg-gray-50 transition-colors"
+                >
+                  닫기
+                </button>
+                <button
+                  onClick={handleReply}
+                  disabled={replyMutation.isPending}
+                  className="flex-1 py-2 bg-blue-700 text-white text-sm rounded hover:bg-blue-800 disabled:opacity-50 transition-colors"
+                >
+                  {replyMutation.isPending ? '저장 중...' : detailTarget.adminReply ? '답변 수정' : '답변 등록'}
+                </button>
+              </div>
+            </div>
           </div>
         </div>
       )}
